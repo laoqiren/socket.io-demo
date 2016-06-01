@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style media="screen">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        html,body {
+            width: 100%;
+            height: 100%;
+        }
+        .send {
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            bottom: 20px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: green;
+        }
+        .send input[type="text"] {
+            width: 85%;
+            height: 40px;
+        }
+        .send button {
+            border: none;
+            width: 10%;
+            height: 40px;
+        }
+        #start-msg {
+            position: fixed;
+            top:0;
+            text-align: center;
+            background-color: green;
+            font-size: 20px;
+            color: white;
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+        }
+        #start-msg span {
+            color: red;
+        }
+        .enterName {
+            opacity: 0.7;
+            width: 40%;
+            height: 50%;
+            background-color: rgb(19, 201, 207);
+            z-index: 5;
+            position: fixed;
+            top:25%;
+            left: 30%;
+            text-align: center;
+        }
+        .enterName h4 {
+            color: yellow;
+            display: inline-block;
+            font-size: 20px;
+            margin-top: 25%;
+        }
+        .enterName input {
+            height: 40px;
+            margin-top: 25%;
+        }
+        .enterName button {
+            border: none;
+            width: 70px;
+            height: 40px;
+            margin-top: 25%;
+        }
+        .otherEnter {
+            position: fixed;
+            right: 50px;
+            top:40px;
+            width: 200px;
+            height: 800px;
+            overflow: auto;
+
+        }
+        .otherEnter li {
+            margin-bottom: 3px;
+            list-style-type: none;
+            background-color: grey;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .chatList {
+            overflow: auto;
+            clear: both;
+            position: absolute;
+            top:45px;
+            bottom: 100px;
+            width: 100%;
+            display: none;
+        }
+        .chatList li span{
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+    <script type="text/javascript" src="./socket.io.js"></script>
+    <script type="text/javascript" src="./jquery.min.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('#login').click(function(){
+                $('.enterName').hide();
+                $('.chatList').eq(0).css({'display':'block'});
+                var name = $('#username').val();
+                var socket = io();
+                function showMsg(e){
+                    e.preventDefault();
+                    $('.chatList ul').append('<li><span>me</span>:'+$('#msg').val()+'</li>')
+                    socket.emit('text',$('#msg').val());
+                }
+                socket.emit('join',name);
+                socket.on('backData',function(data){
+                    $('#start-msg').html(data);
+                });
+                socket.on('announcement',function(msg){
+                    $('.otherEnter ul').append('<li>'+msg+'</li>');
+                });
+                $('.send').submit(showMsg);
+                $('#send').click(showMsg);
+                socket.on('text',function(content){
+                    $('.chatList ul').append('<li>'+ content +'</li>');
+                    //$('.chatList').scrollTop() = 0;
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <p id="start-msg">
+        Welcome to chat home by socket.io(powered by 罗峡)
+    </p>
+    <div class="chatList">
+        <ul>
+        </ul>
+    </div>
+    <div class="enterName">
+        <h4>请输入您的昵称</h4>
+        <input id='username'type="text" placeholder="enter your name">
+        <button id='login'type="button" name="button">进入</button>
+    </div>
+    <div class="otherEnter">
+        <ul>
+
+        </ul>
+    </div>
+    <form class="send">
+        <input id='msg'type="text"placeholder="输入聊天信息">
+        <button id='send'type="button" name="button">send</button>
+    </form>
+</body>
+</html>
